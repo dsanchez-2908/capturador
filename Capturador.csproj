@@ -48,24 +48,26 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Capturador._01_Pantallas._03_Indexacion\frmLotesDisponiblesIDX.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Capturador._01_Pantallas._03_Indexacion\frmHistoriasClinicas.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
 
   <!-- Copiar DLLs nativas al directorio de salida -->
   <Target Name="CopyNativeLibraries" AfterTargets="Build">
     <Message Importance="high" Text="Copiando DLLs nativas..." />
 
     <!-- Copiar pdfium.dll para PdfiumViewer (x64) -->
-    <Copy SourceFiles="$(NuGetPackageRoot)pdfiumviewer.native.x86_64.v8-xfa\2018.4.8.256\Build\x64\pdfium.dll"
-          DestinationFolder="$(OutputPath)"
-          SkipUnchangedFiles="true"
-          Condition="Exists('$(NuGetPackageRoot)pdfiumviewer.native.x86_64.v8-xfa\2018.4.8.256\Build\x64\pdfium.dll')" />
+    <Copy SourceFiles="$(NuGetPackageRoot)pdfiumviewer.native.x86_64.v8-xfa\2018.4.8.256\Build\x64\pdfium.dll" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('$(NuGetPackageRoot)pdfiumviewer.native.x86_64.v8-xfa\2018.4.8.256\Build\x64\pdfium.dll')" />
 
     <!-- Copiar DLLs de Tesseract si existen -->
     <ItemGroup>
       <TesseractNativeFiles Include="$(NuGetPackageRoot)tesseract\**\*.dll" />
     </ItemGroup>
-    <Copy SourceFiles="@(TesseractNativeFiles)"
-          DestinationFolder="$(OutputPath)"
-          SkipUnchangedFiles="true"
-          Condition="'@(TesseractNativeFiles)' != ''" />
+    <Copy SourceFiles="@(TesseractNativeFiles)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'@(TesseractNativeFiles)' != ''" />
   </Target>
 </Project>

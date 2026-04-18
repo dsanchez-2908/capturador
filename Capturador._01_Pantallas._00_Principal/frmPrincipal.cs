@@ -23,7 +23,7 @@ public class frmPrincipal : Form
 
 	private string nombreBaseDeDatos;
 
-	private string tituloFormulario = "Capturador de Datos - MODOC (v20260222)";
+	private string tituloFormulario = "Capturador de Datos - MODOC (v20260417)";
 
 	private IContainer components = null;
 

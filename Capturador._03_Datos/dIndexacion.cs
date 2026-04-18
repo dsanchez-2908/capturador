@@ -261,4 +261,232 @@ public class dIndexacion
 			oCon?.Close();
 		}
 	}
+
+	public static List<eIDX_Historia_Clinica> obtenerIndexacionHistoriasClinicas(eUsuario pUsuarioLogueado, int pCdProyecto, int pCdLote)
+	{
+        SqlConnection oCon = ConexionSQL.ObtenerConexion();
+        SqlCommand oCom = oCon.CreateCommand();
+        oCom.CommandType = CommandType.StoredProcedure;
+        oCom.CommandText = "SP_IDX_HISTORIAS_CLINICAS";
+        oCom.Parameters.Add("@p_cdUsuarioLogueado", SqlDbType.Int).Value = pUsuarioLogueado.cdUsuario;
+        oCom.Parameters.Add("@p_cdOperacion", SqlDbType.VarChar).Value = "1";
+        oCom.Parameters.Add("@p_cdProyecto", SqlDbType.Int).Value = pCdProyecto;
+        oCom.Parameters.Add("@p_cdLote", SqlDbType.Int).Value = pCdLote;
+        try
+        {
+			SqlDataReader oLeer = oCom.ExecuteReader();
+			List<eIDX_Historia_Clinica> oListaHistoriasClinicas = new List<eIDX_Historia_Clinica>();
+			while (oLeer.Read())
+			{
+				eIDX_Historia_Clinica oHistoriaClinica = new eIDX_Historia_Clinica();
+
+				// Mapear campos obligatorios
+				oHistoriaClinica.cdLoteDetalle = Convert.ToInt32(oLeer["cdLoteDetalle"]);
+
+				// Mapear campos que pueden ser NULL
+				if (oLeer["cdProyecto"] != DBNull.Value)
+					oHistoriaClinica.cdProyecto = Convert.ToInt32(oLeer["cdProyecto"]);
+
+				if (oLeer["dsProyecto"] != DBNull.Value)
+					oHistoriaClinica.dsProyecto = oLeer["dsProyecto"].ToString();
+
+				if (oLeer["cdLote"] != DBNull.Value)
+					oHistoriaClinica.cdLote = Convert.ToInt32(oLeer["cdLote"]);
+
+				if (oLeer["dsNombreLote"] != DBNull.Value)
+					oHistoriaClinica.dsNombreLote = oLeer["dsNombreLote"].ToString();
+
+				if (oLeer["nuCantidadArchivos"] != DBNull.Value)
+					oHistoriaClinica.nuCantidadArchivos = Convert.ToInt32(oLeer["nuCantidadArchivos"]);
+
+				//if (oLeer["dsRutaLoteFinal"] != DBNull.Value)
+				//	oHistoriaClinica.dsRutaLoteFinal = oLeer["dsRutaLoteFinal"].ToString();
+
+				if (oLeer["dsTipoDetalle"] != DBNull.Value)
+					oHistoriaClinica.dsTipoDetalle = oLeer["dsTipoDetalle"].ToString();
+
+				if (oLeer["dsNombreArchivo"] != DBNull.Value)
+					oHistoriaClinica.dsNombreArchivo = oLeer["dsNombreArchivo"].ToString();
+
+				if (oLeer["nuCantidadPaginasInicial"] != DBNull.Value)
+					oHistoriaClinica.nuCantidadPaginaInicial = Convert.ToInt32(oLeer["nuCantidadPaginasInicial"]);
+
+				if (oLeer["nuCantidadPaginasFinal"] != DBNull.Value)
+					oHistoriaClinica.nuCantidadPaginasFinal = Convert.ToInt32(oLeer["nuCantidadPaginasFinal"]);
+
+				if (oLeer["nuHistoriaClinica"] != DBNull.Value)
+					oHistoriaClinica.nuHistoriaClinica = oLeer["nuHistoriaClinica"].ToString();
+
+				if (oLeer["nuDNI"] != DBNull.Value)
+					oHistoriaClinica.nuDNI = oLeer["nuDNI"].ToString();
+
+				if (oLeer["feNacimiento"] != DBNull.Value)
+					oHistoriaClinica.feNacimiento = Convert.ToDateTime(oLeer["feNacimiento"]);
+
+				//if (oLeer["feAlta"] != DBNull.Value)
+				//	oHistoriaClinica.feAlta = Convert.ToDateTime(oLeer["feAlta"]);
+
+				if (oLeer["cdUsuarioIndexacion"] != DBNull.Value)
+					oHistoriaClinica.cdUsuarioIndexacion = Convert.ToInt32(oLeer["cdUsuarioIndexacion"]);
+
+				if (oLeer["dsUsuarioIndexacion"] != DBNull.Value)
+					oHistoriaClinica.dsUsuarioIndexacion = oLeer["dsUsuarioIndexacion"].ToString();
+
+				oListaHistoriasClinicas.Add(oHistoriaClinica);
+			}
+			return oListaHistoriasClinicas;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            oCon?.Close();
+        }
+    }
+
+    public static eIDX_Historia_Clinica obtenerArchivoIndexar(eUsuario pUsuarioLogueado, int pCdProyecto, int pCdLote)
+    {
+        SqlConnection oCon = ConexionSQL.ObtenerConexion();
+        SqlCommand oCom = oCon.CreateCommand();
+        oCom.CommandType = CommandType.StoredProcedure;
+        oCom.CommandText = "SP_IDX_HISTORIAS_CLINICAS";
+        oCom.Parameters.Add("@p_cdUsuarioLogueado", SqlDbType.Int).Value = pUsuarioLogueado.cdUsuario;
+        oCom.Parameters.Add("@p_cdOperacion", SqlDbType.VarChar).Value = "2";
+        oCom.Parameters.Add("@p_cdProyecto", SqlDbType.Int).Value = pCdProyecto;
+        oCom.Parameters.Add("@p_cdLote", SqlDbType.Int).Value = pCdLote;
+        try
+        {
+            SqlDataReader oLeer = oCom.ExecuteReader();
+            //List<eIDX_Historia_Clinica> oListaHistoriasClinicas = new List<eIDX_Historia_Clinica>();
+            eIDX_Historia_Clinica oHistoriaClinica = new eIDX_Historia_Clinica();
+            while (oLeer.Read())
+            {
+                
+
+                // Mapear campos obligatorios
+                oHistoriaClinica.cdLoteDetalle = Convert.ToInt32(oLeer["cdLoteDetalle"]);
+
+                // Mapear campos que pueden ser NULL
+                if (oLeer["cdProyecto"] != DBNull.Value)
+                    oHistoriaClinica.cdProyecto = Convert.ToInt32(oLeer["cdProyecto"]);
+
+                if (oLeer["dsProyecto"] != DBNull.Value)
+                    oHistoriaClinica.dsProyecto = oLeer["dsProyecto"].ToString();
+
+                if (oLeer["cdLote"] != DBNull.Value)
+                    oHistoriaClinica.cdLote = Convert.ToInt32(oLeer["cdLote"]);
+
+                if (oLeer["dsNombreLote"] != DBNull.Value)
+                    oHistoriaClinica.dsNombreLote = oLeer["dsNombreLote"].ToString();
+
+                if (oLeer["nuCantidadArchivos"] != DBNull.Value)
+                    oHistoriaClinica.nuCantidadArchivos = Convert.ToInt32(oLeer["nuCantidadArchivos"]);
+
+                //if (oLeer["dsRutaLoteFinal"] != DBNull.Value)
+                //	oHistoriaClinica.dsRutaLoteFinal = oLeer["dsRutaLoteFinal"].ToString();
+
+                if (oLeer["dsTipoDetalle"] != DBNull.Value)
+                    oHistoriaClinica.dsTipoDetalle = oLeer["dsTipoDetalle"].ToString();
+
+                if (oLeer["dsNombreArchivo"] != DBNull.Value)
+                    oHistoriaClinica.dsNombreArchivo = oLeer["dsNombreArchivo"].ToString();
+
+                if (oLeer["nuCantidadPaginasInicial"] != DBNull.Value)
+                    oHistoriaClinica.nuCantidadPaginaInicial = Convert.ToInt32(oLeer["nuCantidadPaginasInicial"]);
+
+                if (oLeer["nuCantidadPaginasFinal"] != DBNull.Value)
+                    oHistoriaClinica.nuCantidadPaginasFinal = Convert.ToInt32(oLeer["nuCantidadPaginasFinal"]);
+
+                if (oLeer["nuHistoriaClinica"] != DBNull.Value)
+                    oHistoriaClinica.nuHistoriaClinica = oLeer["nuHistoriaClinica"].ToString();
+
+                if (oLeer["nuDNI"] != DBNull.Value)
+                    oHistoriaClinica.nuDNI = oLeer["nuDNI"].ToString();
+
+                if (oLeer["feNacimiento"] != DBNull.Value)
+                    oHistoriaClinica.feNacimiento = Convert.ToDateTime(oLeer["feNacimiento"]);
+
+                //if (oLeer["feAlta"] != DBNull.Value)
+                //	oHistoriaClinica.feAlta = Convert.ToDateTime(oLeer["feAlta"]);
+
+                if (oLeer["cdUsuarioIndexacion"] != DBNull.Value)
+                    oHistoriaClinica.cdUsuarioIndexacion = Convert.ToInt32(oLeer["cdUsuarioIndexacion"]);
+
+                if (oLeer["dsUsuarioIndexacion"] != DBNull.Value)
+                    oHistoriaClinica.dsUsuarioIndexacion = oLeer["dsUsuarioIndexacion"].ToString();
+
+                //oListaHistoriasClinicas.Add(oHistoriaClinica);
+            }
+            return oHistoriaClinica;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        finally
+        {
+            oCon?.Close();
+        }
+    }
+
+    public static void guardarHistoriaClinica(eUsuario pUsuarioLogueado, int pCdProyecto, int pCdLote, eIDX_Historia_Clinica pIDX_Historia_Clinica)
+    {
+        SqlConnection oCon = ConexionSQL.ObtenerConexion();
+        SqlCommand oCom = oCon.CreateCommand();
+        oCom.CommandType = CommandType.StoredProcedure;
+        oCom.CommandText = "SP_IDX_HISTORIAS_CLINICAS";
+        oCom.Parameters.Add("@p_cdUsuarioLogueado", SqlDbType.Int).Value = pUsuarioLogueado.cdUsuario;
+        oCom.Parameters.Add("@p_cdOperacion", SqlDbType.VarChar).Value = "3";
+
+        oCom.Parameters.Add("@p_cdProyecto", SqlDbType.Int).Value = pCdProyecto;
+        oCom.Parameters.Add("@p_cdLote", SqlDbType.Int).Value = pCdLote;
+
+        oCom.Parameters.Add("@p_cdLoteDetalle", SqlDbType.Int).Value = pIDX_Historia_Clinica.cdLoteDetalle;
+        
+		oCom.Parameters.Add("@p_nuHistoriaClinica", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.nuHistoriaClinica;
+        oCom.Parameters.Add("@p_nuDNI", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.nuDNI;
+        oCom.Parameters.Add("@p_feNacimiento", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.feNacimiento;
+
+        try
+        {
+            oCom.ExecuteNonQuery();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            oCon?.Close();
+        }
+    }
+
+    public static void finalizarIndexacionHistoriaClinica(eUsuario pUsuarioLogueado, int pCdProyecto, int pCdLote)
+    {
+        SqlConnection oCon = ConexionSQL.ObtenerConexion();
+        SqlCommand oCom = oCon.CreateCommand();
+        oCom.CommandType = CommandType.StoredProcedure;
+        oCom.CommandText = "SP_IDX_HISTORIAS_CLINICAS";
+        oCom.Parameters.Add("@p_cdUsuarioLogueado", SqlDbType.Int).Value = pUsuarioLogueado.cdUsuario;
+        oCom.Parameters.Add("@p_cdOperacion", SqlDbType.VarChar).Value = "4";
+
+        oCom.Parameters.Add("@p_cdProyecto", SqlDbType.Int).Value = pCdProyecto;
+        oCom.Parameters.Add("@p_cdLote", SqlDbType.Int).Value = pCdLote;		       
+
+        try
+        {
+            oCom.ExecuteNonQuery();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            oCon?.Close();
+        }
+    }
+
 }

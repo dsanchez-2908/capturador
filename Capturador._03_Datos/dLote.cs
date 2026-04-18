@@ -639,4 +639,81 @@ public class dLote
 			oCon?.Close();
 		}
 	}
+
+
+    public static eLote obtenerUnLote(eUsuario pUsuarioLogueado, string pOperacion, int pCdLote)
+    {
+        eLote oLoteEncontrado = new eLote();
+
+        using SqlConnection oCon = ConexionSQL.ObtenerConexion();
+        SqlCommand cmd = new SqlCommand();
+        SqlDataAdapter da = new SqlDataAdapter();
+        DataTable dt = new DataTable();
+        try
+        {
+            cmd = new SqlCommand("SP_LOTE_ObtenerLote", oCon);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@p_cdUsuarioLogueado", pUsuarioLogueado.cdUsuario);
+            cmd.Parameters.AddWithValue("@p_operacion", pOperacion);
+            cmd.Parameters.AddWithValue("@p_cdLote", pCdLote);
+            da.SelectCommand = cmd;
+            da.Fill(dt);
+
+            // Mapear datos del DataTable al objeto eLote
+            if (dt.Rows.Count > 0)
+            {
+                DataRow row = dt.Rows[0];
+
+                oLoteEncontrado.cdLote = Convert.ToInt32(row["cdLote"]);
+                oLoteEncontrado.cdProyecto = Convert.ToInt32(row["cdProyecto"]);
+                oLoteEncontrado.dsProyecto = row["dsProyecto"].ToString();
+                oLoteEncontrado.dsNombreLote = row["dsNombreLote"].ToString();
+                oLoteEncontrado.dsRutaLote = row["dsRutaLote"].ToString();
+                oLoteEncontrado.nuCantidadArchivos = Convert.ToInt32(row["nuCantidadArchivos"]);
+                oLoteEncontrado.feAlta = Convert.ToDateTime(row["feAlta"]);
+                oLoteEncontrado.cdUsuarioAlta = Convert.ToInt32(row["cdUsuarioAlta"]);
+                oLoteEncontrado.dsUsuarioAlta = row["dsUsuarioAlta"].ToString();
+
+                // Campos que pueden ser nulos - validar antes de convertir
+                if (row["fePreparado"] != DBNull.Value)
+                    oLoteEncontrado.fePreparado = Convert.ToDateTime(row["fePreparado"]);
+
+                if (row["cdUsuarioPreparado"] != DBNull.Value)
+                    oLoteEncontrado.cdUsuarioPreparado = Convert.ToInt32(row["cdUsuarioPreparado"]);
+
+                if (row["feControlCalidad"] != DBNull.Value)
+                    oLoteEncontrado.feControlCalidad = Convert.ToDateTime(row["feControlCalidad"]);
+
+                if (row["cdUsuarioControlCalidad"] != DBNull.Value)
+                    oLoteEncontrado.cdUsuarioControlCalidad = Convert.ToInt32(row["cdUsuarioControlCalidad"]);
+
+                if (row["feIndexacion"] != DBNull.Value)
+                    oLoteEncontrado.feIndexacion = Convert.ToDateTime(row["feIndexacion"]);
+
+                if (row["cdUsuarioIndexacion"] != DBNull.Value)
+                    oLoteEncontrado.cdUsuarioIndexacion = Convert.ToInt32(row["cdUsuarioIndexacion"]);
+
+                if (row["feSalida"] != DBNull.Value)
+                    oLoteEncontrado.feSalida = Convert.ToDateTime(row["feSalida"]);
+
+                if (row["cdUsuarioSalida"] != DBNull.Value)
+                    oLoteEncontrado.cdUsuarioSalida = Convert.ToInt32(row["cdUsuarioSalida"]);
+
+                oLoteEncontrado.cdEstado = Convert.ToInt32(row["cdEstado"]);
+                oLoteEncontrado.dsEstado = row["dsEstado"].ToString();
+            }
+
+            return oLoteEncontrado;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            oCon?.Close();
+        }
+    }
+
+
 }

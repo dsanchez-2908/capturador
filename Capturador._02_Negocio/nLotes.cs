@@ -54,8 +54,15 @@ public class nLotes
 		{
 			cdLote = dLote.agregarLote(pUsuarioLogueado, item);
 			ingresarLoteDetalle(pUsuarioLogueado, cdLote, item);
-			dLote.agregarPreIndexacionDespacho(pUsuarioLogueado, 1, cdLote);
-		}
+			if (item.cdProyecto == 1)
+			{
+                dLote.agregarPreIndexacionDespacho(pUsuarioLogueado, 1, cdLote);
+            }
+            if (item.cdProyecto == 9)
+            {
+                dLote.agregarPreIndexacionDespacho(pUsuarioLogueado, 9, cdLote);
+            }
+        }
 	}
 
 	private static void ingresarLoteDetalle(eUsuario pUsuarioLogueado, int pCdLote, eLote pLote)
@@ -227,7 +234,12 @@ public class nLotes
 		return dLote.obtenerLote(pUsuarioLogueado, "1", pCdLote);
 	}
 
-	public static DataTable obtenerLoteDetalle(eUsuario pUsuarioLogueado, int pCdLote)
+    public static eLote obtenerUnLote(eUsuario pUsuarioLogueado, int pCdLote)
+    {
+        return dLote.obtenerUnLote(pUsuarioLogueado, "1", pCdLote);
+    }
+
+    public static DataTable obtenerLoteDetalle(eUsuario pUsuarioLogueado, int pCdLote)
 	{
 		return dLote.obtenerLote(pUsuarioLogueado, "2", pCdLote);
 	}

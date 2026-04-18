@@ -184,4 +184,27 @@ public class nIndexacion
 		}
 		return oTablaLotesNoCargados;
 	}
+
+	public static List<eIDX_Historia_Clinica> ObtenerListaHistoriasClinicas(eUsuario pUsuario, int pCdProyecto, int pCdLote)
+	{
+		return dIndexacion.obtenerIndexacionHistoriasClinicas(pUsuario, pCdProyecto, pCdLote);
+	}
+
+    public static eIDX_Historia_Clinica ObtenerProximoIndexar(eUsuario pUsuario, int pCdProyecto, int pCdLote)
+    {
+        return dIndexacion.obtenerArchivoIndexar(pUsuario, pCdProyecto, pCdLote);
+    }
+
+
+	public static void agregarHistoriaClinica(eUsuario pUsuarioLogueado, int pCdProyecto, int pCdLote, eIDX_Historia_Clinica pHistoriaClinica)
+	{
+		dIndexacion.guardarHistoriaClinica(pUsuarioLogueado, pCdProyecto,pCdLote , pHistoriaClinica);
+    }
+
+    public static void finalizarIndexacionHistoriaClinica(eUsuario pUsuarioLogueado, int pCdProyecto, int pCdLote)
+    {
+        dIndexacion.finalizarIndexacionHistoriaClinica(pUsuarioLogueado, pCdProyecto, pCdLote);
+    }
+
+
 }

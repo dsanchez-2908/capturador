@@ -119,60 +119,162 @@ internal class nCodigoBarras_v7_Despachos
 		});
 	}
 
-	private static List<eCodigosBarrasEncontrados_v2> extraerCodigoBarras(eDespacho pDespacho)
-	{
-		List<eCodigosBarrasEncontrados_v2> oListaEncontrado = new List<eCodigosBarrasEncontrados_v2>();
-		string pdfPath = pDespacho.dsRutaArchivoPDF;
-		if (!File.Exists(pdfPath))
-		{
-			throw new Exception("Advertencia: El archivo PDF no existe: " + pdfPath);
-		}
-		try
-		{
-			using PdfiumViewer.PdfDocument document = PdfiumViewer.PdfDocument.Load(pdfPath);
-			DecodingOptions decodingOptions = new DecodingOptions
-			{
-				PossibleFormats = new List<BarcodeFormat>
-				{
-					BarcodeFormat.CODE_128,
-					BarcodeFormat.CODE_39,
-					BarcodeFormat.ITF
-				}
-			};
-			BarcodeReader reader = new BarcodeReader
-			{
-				Options = decodingOptions,
-				AutoRotate = true
-			};
-			for (int i = 0; i < document.PageCount; i++)
-			{
-				using Image pageImage = document.Render(i, 600f, 600f, PdfRenderFlags.None);
-				Result result = reader.Decode((Bitmap)pageImage);
-				if (result != null && int.TryParse(result.Text, out var valorEncontrado) && valorEncontrado >= 1 && valorEncontrado <= 5)
-				{
-					eCodigosBarrasEncontrados_v2 encontrado = new eCodigosBarrasEncontrados_v2
-					{
-						CarpetaInicial = pDespacho.dsRutaArchivoPDF,
-						NombreLote = pDespacho.dsNombreLote,
-						Despacho = pDespacho.dsDespacho,
-						NumeroPagina = i + 1,
-						ValorEncontrado = valorEncontrado
-					};
-					if (!oListaEncontrado.Any((eCodigosBarrasEncontrados_v2 c) => c.CarpetaInicial == encontrado.CarpetaInicial && c.NombreLote == encontrado.NombreLote && c.Despacho == encontrado.Despacho && c.NumeroPagina == encontrado.NumeroPagina && c.ValorEncontrado == encontrado.ValorEncontrado))
-					{
-						oListaEncontrado.Add(encontrado);
-					}
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			throw new Exception("Error al extraer códigos de barras del PDF " + pdfPath + ": " + ex.Message);
-		}
-		return oListaEncontrado;
-	}
+    // ARCHIVO: nCodigoBarras_v7_Despachos.cs
 
-	public static string crearCarpeta(string pRutaCarpeta, eDespacho pDespacho)
+    private static List<eCodigosBarrasEncontrados_v2> extraerCodigoBarras(eDespacho pDespacho)
+    {
+        List<eCodigosBarrasEncontrados_v2> oListaEncontrado = new List<eCodigosBarrasEncontrados_v2>();
+        string pdfPath = pDespacho.dsRutaArchivoPDF;
+
+        if (!File.Exists(pdfPath))
+        {
+            throw new Exception("Advertencia: El archivo PDF no existe: " + pdfPath);
+        }
+
+        try
+        {
+            using (PdfiumViewer.PdfDocument document = PdfiumViewer.PdfDocument.Load(pdfPath))
+            {
+                DecodingOptions decodingOptions = new DecodingOptions
+                {
+                    PossibleFormats = new List<BarcodeFormat>
+                {
+                    BarcodeFormat.CODE_128,
+                    BarcodeFormat.CODE_39,
+                    BarcodeFormat.ITF
+                },
+                    TryHarder = false // CAMBIO: Desactivar TryHarder para mayor velocidad
+                };
+
+                BarcodeReader reader = new BarcodeReader
+                {
+                    Options = decodingOptions,
+                    AutoRotate = false // CAMBIO: Desactivar AutoRotate innecesario
+                };
+
+                // CAMBIO: Procesar en bloques de 10 páginas para liberar memoria frecuentemente
+                const int BLOQUE_PAGINAS = 10;
+                int totalPaginas = document.PageCount;
+
+                for (int bloqueInicio = 0; bloqueInicio < totalPaginas; bloqueInicio += BLOQUE_PAGINAS)
+                {
+                    int bloqueFin = Math.Min(bloqueInicio + BLOQUE_PAGINAS, totalPaginas);
+
+                    for (int i = bloqueInicio; i < bloqueFin; i++)
+                    {
+                        Image pageImage = null;
+                        try
+                        {
+                            // CAMBIO: Reducir a 150 DPI (suficiente para códigos de barras)
+                            pageImage = document.Render(i, 150f, 150f, PdfRenderFlags.None);
+
+                            Result result = reader.Decode((Bitmap)pageImage);
+
+                            if (result != null &&
+                                int.TryParse(result.Text, out var valorEncontrado) &&
+                                valorEncontrado >= 1 &&
+                                valorEncontrado <= 5)
+                            {
+                                eCodigosBarrasEncontrados_v2 encontrado = new eCodigosBarrasEncontrados_v2
+                                {
+                                    CarpetaInicial = pDespacho.dsRutaArchivoPDF,
+                                    NombreLote = pDespacho.dsNombreLote,
+                                    Despacho = pDespacho.dsDespacho,
+                                    NumeroPagina = i + 1,
+                                    ValorEncontrado = valorEncontrado
+                                };
+
+                                if (!oListaEncontrado.Any(c =>
+                                    c.CarpetaInicial == encontrado.CarpetaInicial &&
+                                    c.NombreLote == encontrado.NombreLote &&
+                                    c.Despacho == encontrado.Despacho &&
+                                    c.NumeroPagina == encontrado.NumeroPagina &&
+                                    c.ValorEncontrado == encontrado.ValorEncontrado))
+                                {
+                                    oListaEncontrado.Add(encontrado);
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            // CAMBIO: Liberación explícita e inmediata
+                            if (pageImage != null)
+                            {
+                                pageImage.Dispose();
+                                pageImage = null;
+                            }
+                        }
+                    }
+
+                    // CAMBIO CORREGIDO: Sintaxis correcta para .NET Framework 4.8
+                    GC.Collect(2, GCCollectionMode.Forced, true);
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect(2, GCCollectionMode.Forced, true);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error al extraer códigos de barras del PDF " + pdfPath + ": " + ex.Message);
+        }
+
+        return oListaEncontrado;
+    }
+
+    //   private static List<eCodigosBarrasEncontrados_v2> extraerCodigoBarras(eDespacho pDespacho)
+    //{
+    //	List<eCodigosBarrasEncontrados_v2> oListaEncontrado = new List<eCodigosBarrasEncontrados_v2>();
+    //	string pdfPath = pDespacho.dsRutaArchivoPDF;
+    //	if (!File.Exists(pdfPath))
+    //	{
+    //		throw new Exception("Advertencia: El archivo PDF no existe: " + pdfPath);
+    //	}
+    //	try
+    //	{
+    //		using PdfiumViewer.PdfDocument document = PdfiumViewer.PdfDocument.Load(pdfPath);
+    //		DecodingOptions decodingOptions = new DecodingOptions
+    //		{
+    //			PossibleFormats = new List<BarcodeFormat>
+    //			{
+    //				BarcodeFormat.CODE_128,
+    //				BarcodeFormat.CODE_39,
+    //				BarcodeFormat.ITF
+    //			}
+    //		};
+    //		BarcodeReader reader = new BarcodeReader
+    //		{
+    //			Options = decodingOptions,
+    //			AutoRotate = true
+    //		};
+    //		for (int i = 0; i < document.PageCount; i++)
+    //		{
+    //			using Image pageImage = document.Render(i, 600f, 600f, PdfRenderFlags.None);
+    //			Result result = reader.Decode((Bitmap)pageImage);
+    //			if (result != null && int.TryParse(result.Text, out var valorEncontrado) && valorEncontrado >= 1 && valorEncontrado <= 5)
+    //			{
+    //				eCodigosBarrasEncontrados_v2 encontrado = new eCodigosBarrasEncontrados_v2
+    //				{
+    //					CarpetaInicial = pDespacho.dsRutaArchivoPDF,
+    //					NombreLote = pDespacho.dsNombreLote,
+    //					Despacho = pDespacho.dsDespacho,
+    //					NumeroPagina = i + 1,
+    //					ValorEncontrado = valorEncontrado
+    //				};
+    //				if (!oListaEncontrado.Any((eCodigosBarrasEncontrados_v2 c) => c.CarpetaInicial == encontrado.CarpetaInicial && c.NombreLote == encontrado.NombreLote && c.Despacho == encontrado.Despacho && c.NumeroPagina == encontrado.NumeroPagina && c.ValorEncontrado == encontrado.ValorEncontrado))
+    //				{
+    //					oListaEncontrado.Add(encontrado);
+    //				}
+    //			}
+    //		}
+    //	}
+    //	catch (Exception ex)
+    //	{
+    //		throw new Exception("Error al extraer códigos de barras del PDF " + pdfPath + ": " + ex.Message);
+    //	}
+    //	return oListaEncontrado;
+    //}
+
+    public static string crearCarpeta(string pRutaCarpeta, eDespacho pDespacho)
 	{
 		string nombreCarpeta = pDespacho.dsDespacho + " - " + pDespacho.cdSerieDocumental + " - " + pDespacho.nuSIGEA + " - " + DateTime.Now.ToString("yyyy-MM-dd");
 		return dArchivos.crearCarpeta(pRutaCarpeta, nombreCarpeta);

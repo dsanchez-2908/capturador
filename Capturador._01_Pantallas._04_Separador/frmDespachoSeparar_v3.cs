@@ -578,74 +578,234 @@ public class frmDespachoSeparar_v3 : Form
 		progressBar1.Visible = false;
 	}
 
-	private async Task buscarCodigosBarraAsync()
-	{
-		int cantidadArchivos = dgvIndicesEncontrados.Rows.Count;
-		progressBar1.Maximum = cantidadArchivos;
-		progressBar1.Value = 0;
-		int maxGradoParalelismo = Environment.ProcessorCount;
-		if (maxGradoParalelismo == 0)
-		{
-			maxGradoParalelismo = 4;
-		}
-		SemaphoreSlim semaphore = new SemaphoreSlim(maxGradoParalelismo);
-		try
-		{
-			List<Task> tareas = new List<Task>();
-			foreach (DataGridViewRow row in (IEnumerable)dgvIndicesEncontrados.Rows)
-			{
-				tareas.Add(Task.Run(async delegate
-				{
-					await semaphore.WaitAsync();
-					try
-					{
-						List<eCodigosBarrasEncontrados_v2> resultado = await nCodigoBarras_v7_Despachos.buscarCodigoBarrasAsync(pDespacho: new eDespacho
-						{
-							id = Convert.ToInt32(row.Cells[0].Value.ToString()),
-							dsDespacho = row.Cells[1].Value.ToString(),
-							cdSerieDocumental = row.Cells[2].Value.ToString(),
-							nuSIGEA = row.Cells[3].Value.ToString(),
-							nuGuia = row.Cells[4].Value.ToString(),
-							dsUsuarioDigitalizacion = row.Cells[5].Value.ToString(),
-							dsNombreLote = row.Cells[6].Value.ToString(),
-							dsRutaArchivoPDF = row.Cells[7].Value.ToString()
-						}, pUsuarioLogueado: oUsuarioLogueado);
-						lock (listaCodigoBarraFinal)
-						{
-							listaCodigoBarraFinal.AddRange(resultado);
-						}
-						Invoke((Action)delegate
-						{
-							progressBar1.Value = Math.Min(progressBar1.Value + 1, progressBar1.Maximum);
-						});
-					}
-					catch (Exception ex)
-					{
-						Exception ex2 = ex;
-						Exception ex3 = ex2;
-						Invoke((Action)delegate
-						{
-							MessageBox.Show($"Error procesando despacho {row.Cells[1].Value}: {ex3.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-						});
-					}
-					finally
-					{
-						semaphore.Release();
-					}
-				}));
-			}
-			await Task.WhenAll(tareas);
-		}
-		finally
-		{
-			if (semaphore != null)
-			{
-				((IDisposable)semaphore).Dispose();
-			}
-		}
-	}
 
-	private void ajustarFormulario_SeleccionarLote()
+    // ARCHIVO: frmDespachoSeparar_v3.cs
+
+    private async Task buscarCodigosBarraAsync()
+    {
+        int cantidadArchivos = dgvIndicesEncontrados.Rows.Count;
+        progressBar1.Maximum = cantidadArchivos;
+        progressBar1.Value = 0;
+
+        // CAMBIO: Analizar tamaño de archivos primero
+        List<(DataGridViewRow row, long tamañoBytes)> archivosConTamaño = new List<(DataGridViewRow, long)>();
+
+        foreach (DataGridViewRow row in (IEnumerable)dgvIndicesEncontrados.Rows)
+        {
+            string rutaPdf = row.Cells[7].Value.ToString();
+            long tamaño = 0;
+
+            if (File.Exists(rutaPdf))
+            {
+                FileInfo fileInfo = new FileInfo(rutaPdf);
+                tamaño = fileInfo.Length;
+            }
+
+            archivosConTamaño.Add((row, tamaño));
+        }
+
+        // CAMBIO: Ordenar por tamaño (procesar archivos grandes primero y solos)
+        archivosConTamaño = archivosConTamaño.OrderByDescending(x => x.tamañoBytes).ToList();
+
+        // CAMBIO: Separar archivos grandes (>50 MB) de pequeños
+        const long UMBRAL_GRANDE = 50 * 1024 * 1024; // 50 MB
+        var archivosGrandes = archivosConTamaño.Where(x => x.tamañoBytes > UMBRAL_GRANDE).ToList();
+        var archivosPequeños = archivosConTamaño.Where(x => x.tamañoBytes <= UMBRAL_GRANDE).ToList();
+
+        try
+        {
+            // PASO 1: Procesar archivos GRANDES de forma SECUENCIAL (sin paralelismo)
+            foreach (var item in archivosGrandes)
+            {
+                DataGridViewRow row = item.row;
+
+                try
+                {
+                    // Forzar limpieza antes de procesar archivo grande
+                    GC.Collect(2, GCCollectionMode.Forced);
+                    GC.WaitForPendingFinalizers();
+
+                    List<eCodigosBarrasEncontrados_v2> resultado = await nCodigoBarras_v7_Despachos.buscarCodigoBarrasAsync(
+                        pDespacho: new eDespacho
+                        {
+                            id = Convert.ToInt32(row.Cells[0].Value.ToString()),
+                            dsDespacho = row.Cells[1].Value.ToString(),
+                            cdSerieDocumental = row.Cells[2].Value.ToString(),
+                            nuSIGEA = row.Cells[3].Value.ToString(),
+                            nuGuia = row.Cells[4].Value.ToString(),
+                            dsUsuarioDigitalizacion = row.Cells[5].Value.ToString(),
+                            dsNombreLote = row.Cells[6].Value.ToString(),
+                            dsRutaArchivoPDF = row.Cells[7].Value.ToString()
+                        },
+                        pUsuarioLogueado: oUsuarioLogueado);
+
+                    lock (listaCodigoBarraFinal)
+                    {
+                        listaCodigoBarraFinal.AddRange(resultado);
+                    }
+
+                    Invoke((Action)delegate
+                    {
+                        progressBar1.Value = Math.Min(progressBar1.Value + 1, progressBar1.Maximum);
+                    });
+
+                    // Limpieza agresiva después de archivo grande
+                    GC.Collect(2, GCCollectionMode.Forced);
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect(2, GCCollectionMode.Forced);
+                }
+                catch (Exception ex)
+                {
+                    Invoke((Action)delegate
+                    {
+                        MessageBox.Show($"Error procesando despacho grande {row.Cells[1].Value}: {ex.Message}",
+                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                    });
+                }
+            }
+
+            // PASO 2: Procesar archivos PEQUEÑOS en paralelo (con paralelismo limitado)
+            if (archivosPequeños.Count > 0)
+            {
+                int maxGradoParalelismo = 2; // CAMBIO: Solo 2 threads para archivos pequeños
+                SemaphoreSlim semaphore = new SemaphoreSlim(maxGradoParalelismo);
+
+                try
+                {
+                    List<Task> tareas = new List<Task>();
+
+                    foreach (var item in archivosPequeños)
+                    {
+                        DataGridViewRow row = item.row;
+
+                        tareas.Add(Task.Run(async delegate
+                        {
+                            await semaphore.WaitAsync();
+                            try
+                            {
+                                List<eCodigosBarrasEncontrados_v2> resultado = await nCodigoBarras_v7_Despachos.buscarCodigoBarrasAsync(
+                                    pDespacho: new eDespacho
+                                    {
+                                        id = Convert.ToInt32(row.Cells[0].Value.ToString()),
+                                        dsDespacho = row.Cells[1].Value.ToString(),
+                                        cdSerieDocumental = row.Cells[2].Value.ToString(),
+                                        nuSIGEA = row.Cells[3].Value.ToString(),
+                                        nuGuia = row.Cells[4].Value.ToString(),
+                                        dsUsuarioDigitalizacion = row.Cells[5].Value.ToString(),
+                                        dsNombreLote = row.Cells[6].Value.ToString(),
+                                        dsRutaArchivoPDF = row.Cells[7].Value.ToString()
+                                    },
+                                    pUsuarioLogueado: oUsuarioLogueado);
+
+                                lock (listaCodigoBarraFinal)
+                                {
+                                    listaCodigoBarraFinal.AddRange(resultado);
+                                }
+
+                                Invoke((Action)delegate
+                                {
+                                    progressBar1.Value = Math.Min(progressBar1.Value + 1, progressBar1.Maximum);
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                Invoke((Action)delegate
+                                {
+                                    MessageBox.Show($"Error procesando despacho {row.Cells[1].Value}: {ex.Message}",
+                                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+                                });
+                            }
+                            finally
+                            {
+                                semaphore.Release();
+                            }
+                        }));
+                    }
+
+                    await Task.WhenAll(tareas);
+                }
+                finally
+                {
+                    semaphore?.Dispose();
+                }
+            }
+        }
+        finally
+        {
+            // Limpieza final
+            GC.Collect(2, GCCollectionMode.Forced);
+            GC.WaitForPendingFinalizers();
+        }
+    }
+
+    //   private async Task buscarCodigosBarraAsync()
+    //{
+    //	int cantidadArchivos = dgvIndicesEncontrados.Rows.Count;
+    //	progressBar1.Maximum = cantidadArchivos;
+    //	progressBar1.Value = 0;
+    //	int maxGradoParalelismo = Environment.ProcessorCount;
+    //	if (maxGradoParalelismo == 0)
+    //	{
+    //		maxGradoParalelismo = 4;
+    //	}
+    //	SemaphoreSlim semaphore = new SemaphoreSlim(maxGradoParalelismo);
+    //	try
+    //	{
+    //		List<Task> tareas = new List<Task>();
+    //		foreach (DataGridViewRow row in (IEnumerable)dgvIndicesEncontrados.Rows)
+    //		{
+    //			tareas.Add(Task.Run(async delegate
+    //			{
+    //				await semaphore.WaitAsync();
+    //				try
+    //				{
+    //					List<eCodigosBarrasEncontrados_v2> resultado = await nCodigoBarras_v7_Despachos.buscarCodigoBarrasAsync(pDespacho: new eDespacho
+    //					{
+    //						id = Convert.ToInt32(row.Cells[0].Value.ToString()),
+    //						dsDespacho = row.Cells[1].Value.ToString(),
+    //						cdSerieDocumental = row.Cells[2].Value.ToString(),
+    //						nuSIGEA = row.Cells[3].Value.ToString(),
+    //						nuGuia = row.Cells[4].Value.ToString(),
+    //						dsUsuarioDigitalizacion = row.Cells[5].Value.ToString(),
+    //						dsNombreLote = row.Cells[6].Value.ToString(),
+    //						dsRutaArchivoPDF = row.Cells[7].Value.ToString()
+    //					}, pUsuarioLogueado: oUsuarioLogueado);
+    //					lock (listaCodigoBarraFinal)
+    //					{
+    //						listaCodigoBarraFinal.AddRange(resultado);
+    //					}
+    //					Invoke((Action)delegate
+    //					{
+    //						progressBar1.Value = Math.Min(progressBar1.Value + 1, progressBar1.Maximum);
+    //					});
+    //				}
+    //				catch (Exception ex)
+    //				{
+    //					Exception ex2 = ex;
+    //					Exception ex3 = ex2;
+    //					Invoke((Action)delegate
+    //					{
+    //						MessageBox.Show($"Error procesando despacho {row.Cells[1].Value}: {ex3.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+    //					});
+    //				}
+    //				finally
+    //				{
+    //					semaphore.Release();
+    //				}
+    //			}));
+    //		}
+    //		await Task.WhenAll(tareas);
+    //	}
+    //	finally
+    //	{
+    //		if (semaphore != null)
+    //		{
+    //			((IDisposable)semaphore).Dispose();
+    //		}
+    //	}
+    //}
+
+    private void ajustarFormulario_SeleccionarLote()
 	{
 		base.MaximizeBox = false;
 		base.Size = new Size(1550, 270);
@@ -2323,7 +2483,6 @@ public class frmDespachoSeparar_v3 : Form
             this.btnProcesarIndices.Size = new System.Drawing.Size(600, 25);
             this.btnProcesarIndices.TabIndex = 53;
             this.btnProcesarIndices.Text = "   Buscar Seperadores";
-            this.btnProcesarIndices.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.btnProcesarIndices.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.btnProcesarIndices.UseVisualStyleBackColor = false;
             this.btnProcesarIndices.Click += new System.EventHandler(this.btnProcesarIndices_Click);
