@@ -715,5 +715,83 @@ public class dLote
         }
     }
 
+    public static DataTable obtenerConsultaHistoiaClinica(eUsuario pUsuarioLogueado, int pCdLote, string pNombreLote, int pCdEstadoLote, DateTime pFeAltaDesde, DateTime pFeAltaHasta, int pCdUsuarioIndexado, DateTime pFeIndexadoDesde, DateTime pFeIndexadoHasta, string pHistoriaClinica, string pDNI, string pNombreApellido, DateTime feNacimiento)
+    {
+        using SqlConnection oCon = ConexionSQL.ObtenerConexion();
+        SqlCommand cmd = new SqlCommand();
+        SqlDataAdapter da = new SqlDataAdapter();
+        DataTable dt = new DataTable();
+        try
+        {
+            cmd = new SqlCommand("SP_CONSULTA_HISTORIA_CLINICA", oCon);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@p_cdUsuarioLogueado", pUsuarioLogueado.cdUsuario);
+            
+			if (pCdLote != 0)
+            {
+                cmd.Parameters.AddWithValue("@p_cdLote", pCdLote);
+            }
+            if (!string.IsNullOrEmpty(pNombreLote))
+            {
+                cmd.Parameters.AddWithValue("@p_dsNombreLote", pNombreLote);
+            }            
+            if (pCdEstadoLote != 0)
+            {
+                cmd.Parameters.AddWithValue("@p_cdEstado", pCdEstadoLote);
+            }
+            if (pFeAltaDesde != DateTime.MinValue)
+            {
+                cmd.Parameters.AddWithValue("@p_feAltaLoteDesde", pFeAltaDesde);
+            }
+            if (pFeAltaHasta != DateTime.MinValue)
+            {
+                cmd.Parameters.AddWithValue("@p_feAltaLoteHasta", pFeAltaHasta);
+            }
+            if (pCdUsuarioIndexado != 0)
+            {
+                cmd.Parameters.AddWithValue("@p_cdUsuarioIndexado", pCdUsuarioIndexado);
+            }
+            if (pFeIndexadoDesde != DateTime.MinValue)
+            {
+                cmd.Parameters.AddWithValue("@p_feIndexadoDesde", pFeIndexadoDesde);
+            }
+            if (pFeIndexadoHasta != DateTime.MinValue)
+            {
+                cmd.Parameters.AddWithValue("@p_feIndexadoHasta", pFeIndexadoHasta);
+            }
+            if (!string.IsNullOrEmpty(pHistoriaClinica))
+            {
+                cmd.Parameters.AddWithValue("@p_dsHistoriaClinica", pHistoriaClinica);
+            }
+            if (!string.IsNullOrEmpty(pDNI))
+            {
+                cmd.Parameters.AddWithValue("@p_dsDNI", pDNI);
+            }
+            if (!string.IsNullOrEmpty(pNombreApellido))
+            {
+                cmd.Parameters.AddWithValue("@p_dsNombreApellido", pNombreApellido);
+            }
+            if (feNacimiento != DateTime.MinValue)
+            {
+                cmd.Parameters.AddWithValue("@p_feNacimiento", feNacimiento);
+            }
+
+
+            
+            da.SelectCommand = cmd;
+            da.Fill(dt);
+            return dt;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        finally
+        {
+            oCon?.Close();
+        }
+    }
+
+
 
 }

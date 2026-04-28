@@ -185,7 +185,6 @@ public class frmInicio_v2 : Form
             this.txtUsuario.Name = "txtUsuario";
             this.txtUsuario.Size = new System.Drawing.Size(175, 26);
             this.txtUsuario.TabIndex = 1;
-            this.txtUsuario.Text = "ADMIN";
             // 
             // lblUsuario
             // 
@@ -207,7 +206,6 @@ public class frmInicio_v2 : Form
             this.txtClave.PasswordChar = '*';
             this.txtClave.Size = new System.Drawing.Size(175, 26);
             this.txtClave.TabIndex = 2;
-            this.txtClave.Text = "1234$";
             // 
             // lblClave
             // 

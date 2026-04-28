@@ -320,7 +320,10 @@ public class dIndexacion
 				if (oLeer["nuDNI"] != DBNull.Value)
 					oHistoriaClinica.nuDNI = oLeer["nuDNI"].ToString();
 
-				if (oLeer["feNacimiento"] != DBNull.Value)
+                if (oLeer["dsNombreApellido"] != DBNull.Value)
+                    oHistoriaClinica.dsNombreApellido = oLeer["dsNombreApellido"].ToString();
+
+                if (oLeer["feNacimiento"] != DBNull.Value)
 					oHistoriaClinica.feNacimiento = Convert.ToDateTime(oLeer["feNacimiento"]);
 
 				//if (oLeer["feAlta"] != DBNull.Value)
@@ -405,6 +408,9 @@ public class dIndexacion
                 if (oLeer["nuDNI"] != DBNull.Value)
                     oHistoriaClinica.nuDNI = oLeer["nuDNI"].ToString();
 
+                if (oLeer["dsNombreApellido"] != DBNull.Value)
+                    oHistoriaClinica.dsNombreApellido = oLeer["dsNombreApellido"].ToString();
+
                 if (oLeer["feNacimiento"] != DBNull.Value)
                     oHistoriaClinica.feNacimiento = Convert.ToDateTime(oLeer["feNacimiento"]);
 
@@ -447,6 +453,7 @@ public class dIndexacion
         
 		oCom.Parameters.Add("@p_nuHistoriaClinica", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.nuHistoriaClinica;
         oCom.Parameters.Add("@p_nuDNI", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.nuDNI;
+        oCom.Parameters.Add("@p_dsNombreApellido", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.dsNombreApellido;
         oCom.Parameters.Add("@p_feNacimiento", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.feNacimiento;
 
         try

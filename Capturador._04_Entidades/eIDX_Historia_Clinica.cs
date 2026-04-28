@@ -30,6 +30,8 @@ public class eIDX_Historia_Clinica
 
     private string NUdni;
 
+    private string DSnombreApellido;
+
     private DateTime FEnacimiento;
 
     private DateTime FEalta;
@@ -191,6 +193,18 @@ public class eIDX_Historia_Clinica
         set
         {
             NUdni = value;
+        }
+    }
+
+    public string dsNombreApellido
+    {
+        get
+        {
+            return DSnombreApellido;
+        }
+        set
+        {
+            DSnombreApellido = value;
         }
     }
 

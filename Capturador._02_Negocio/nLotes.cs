@@ -268,4 +268,11 @@ public class nLotes
 			dLote.agregarLoteDetalleFinal(pUsuarioLogueado, pLote.cdProyecto, oLoteDetalle);
 		}
 	}
+
+    public static DataTable obtenerLoteConsultaHistoriaClinica(eUsuario pUsuarioLogueado, int pCdLote, string pNombreLote, int pCdEstadoLote, DateTime pFeAltaDesde, DateTime pFeAltaHasta, int pCdUsuarioIndexado, DateTime pFeIndexadoDesde, DateTime pFeIndexadoHasta, string pHistoriaClinica, string pDNI, string pNombreApellido, DateTime feNacimiento)
+    {
+        return dLote.obtenerConsultaHistoiaClinica(pUsuarioLogueado, pCdLote, pNombreLote, pCdEstadoLote, pFeAltaDesde, pFeAltaHasta, pCdUsuarioIndexado, pFeIndexadoDesde, pFeIndexadoHasta, pHistoriaClinica, pDNI, pNombreApellido, feNacimiento);
+    }
+
+
 }
