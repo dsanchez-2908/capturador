@@ -195,16 +195,31 @@ public class frmHistoriasClinicas : Form
             lblArchivo.Text = nombreArchivo;
             CentrarLabelEnPanel(lblArchivo, panel1);
 
-            // Acá necesito que se seleccionese la fila del DataGridView correspondiente al archivo que se esta indexando, para que el usuario pueda ver a que archivo corresponde la historia clínica que se esta indexando
-            foreach (DataGridViewRow row in dgvDetalleIndexacion.Rows)
+            // Seleccionar la fila del DataGridView correspondiente al archivo que se esta indexando
+            try
             {
-                row.Selected = false;
-                if (row.Cells["dsNombreArchivo"].Value.ToString() == nombreArchivo)
+                foreach (DataGridViewRow row in dgvDetalleIndexacion.Rows)
                 {
-                    row.Selected = true;
-                    dgvDetalleIndexacion.FirstDisplayedScrollingRowIndex = row.Index;
-                    break;
+                    row.Selected = false;
+                    if (row.Cells["dsNombreArchivo"].Value != null && 
+                        row.Cells["dsNombreArchivo"].Value.ToString() == nombreArchivo)
+                    {
+                        row.Selected = true;
+
+                        // Validar que el DataGridView tenga espacio para mostrar filas antes de hacer scroll
+                        if (dgvDetalleIndexacion.DisplayedRowCount(false) > 0)
+                        {
+                            dgvDetalleIndexacion.FirstDisplayedScrollingRowIndex = row.Index;
+                        }
+
+                        break;
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                // Si falla el scroll, al menos la fila quedará seleccionada
+                System.Diagnostics.Debug.WriteLine($"Error al hacer scroll en el grid: {ex.Message}");
             }
 
             cargarImagen(nombreArchivo);
@@ -903,10 +918,10 @@ public class frmHistoriasClinicas : Form
 
 	private void InitializeComponent()
 	{
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             this.btnCerrar = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.txtHistoriaClinica = new System.Windows.Forms.TextBox();
@@ -953,7 +968,7 @@ public class frmHistoriasClinicas : Form
             this.btnCerrar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCerrar.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCerrar.ForeColor = System.Drawing.Color.White;
-            this.btnCerrar.Location = new System.Drawing.Point(326, 806);
+            this.btnCerrar.Location = new System.Drawing.Point(326, 824);
             this.btnCerrar.Name = "btnCerrar";
             this.btnCerrar.Size = new System.Drawing.Size(200, 25);
             this.btnCerrar.TabIndex = 12;
@@ -967,7 +982,7 @@ public class frmHistoriasClinicas : Form
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(26, 335);
+            this.label3.Location = new System.Drawing.Point(22, 261);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(127, 16);
             this.label3.TabIndex = 68;
@@ -976,7 +991,7 @@ public class frmHistoriasClinicas : Form
             // txtHistoriaClinica
             // 
             this.txtHistoriaClinica.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtHistoriaClinica.Location = new System.Drawing.Point(180, 329);
+            this.txtHistoriaClinica.Location = new System.Drawing.Point(176, 255);
             this.txtHistoriaClinica.Name = "txtHistoriaClinica";
             this.txtHistoriaClinica.Size = new System.Drawing.Size(346, 26);
             this.txtHistoriaClinica.TabIndex = 1;
@@ -988,7 +1003,7 @@ public class frmHistoriasClinicas : Form
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.Color.White;
-            this.label4.Location = new System.Drawing.Point(26, 372);
+            this.label4.Location = new System.Drawing.Point(22, 298);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(89, 16);
             this.label4.TabIndex = 70;
@@ -999,7 +1014,7 @@ public class frmHistoriasClinicas : Form
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label5.ForeColor = System.Drawing.Color.White;
-            this.label5.Location = new System.Drawing.Point(26, 446);
+            this.label5.Location = new System.Drawing.Point(22, 372);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(138, 16);
             this.label5.TabIndex = 71;
@@ -1009,7 +1024,7 @@ public class frmHistoriasClinicas : Form
             // 
             this.txtDNI.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtDNI.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtDNI.Location = new System.Drawing.Point(180, 366);
+            this.txtDNI.Location = new System.Drawing.Point(176, 292);
             this.txtDNI.Name = "txtDNI";
             this.txtDNI.Size = new System.Drawing.Size(346, 26);
             this.txtDNI.TabIndex = 2;
@@ -1023,7 +1038,7 @@ public class frmHistoriasClinicas : Form
             this.btnProcesar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnProcesar.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnProcesar.ForeColor = System.Drawing.Color.White;
-            this.btnProcesar.Location = new System.Drawing.Point(29, 806);
+            this.btnProcesar.Location = new System.Drawing.Point(28, 824);
             this.btnProcesar.Name = "btnProcesar";
             this.btnProcesar.Size = new System.Drawing.Size(200, 25);
             this.btnProcesar.TabIndex = 10;
@@ -1038,9 +1053,9 @@ public class frmHistoriasClinicas : Form
             | System.Windows.Forms.AnchorStyles.Left)));
             this.pnlDetallePlanos.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(32)))), ((int)(((byte)(40)))));
             this.pnlDetallePlanos.Controls.Add(this.dgvDetalleIndexacion);
-            this.pnlDetallePlanos.Location = new System.Drawing.Point(26, 537);
+            this.pnlDetallePlanos.Location = new System.Drawing.Point(26, 440);
             this.pnlDetallePlanos.Name = "pnlDetallePlanos";
-            this.pnlDetallePlanos.Size = new System.Drawing.Size(500, 246);
+            this.pnlDetallePlanos.Size = new System.Drawing.Size(500, 378);
             this.pnlDetallePlanos.TabIndex = 65;
             // 
             // dgvDetalleIndexacion
@@ -1053,45 +1068,45 @@ public class frmHistoriasClinicas : Form
             this.dgvDetalleIndexacion.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgvDetalleIndexacion.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.SingleHorizontal;
             this.dgvDetalleIndexacion.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle13.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(96)))), ((int)(((byte)(130)))));
-            dataGridViewCellStyle13.Font = new System.Drawing.Font("Century Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle13.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(96)))), ((int)(((byte)(130)))));
-            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvDetalleIndexacion.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(96)))), ((int)(((byte)(130)))));
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Century Gothic", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(77)))), ((int)(((byte)(96)))), ((int)(((byte)(130)))));
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvDetalleIndexacion.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.dgvDetalleIndexacion.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvDetalleIndexacion.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvDetalleIndexacion.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvDetalleIndexacion.EnableHeadersVisualStyles = false;
             this.dgvDetalleIndexacion.GridColor = System.Drawing.Color.SteelBlue;
             this.dgvDetalleIndexacion.Location = new System.Drawing.Point(22, 48);
             this.dgvDetalleIndexacion.Name = "dgvDetalleIndexacion";
             this.dgvDetalleIndexacion.ReadOnly = true;
             this.dgvDetalleIndexacion.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle15.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(66)))), ((int)(((byte)(82)))));
-            dataGridViewCellStyle15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle15.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.Color.SteelBlue;
-            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvDetalleIndexacion.RowHeadersDefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(66)))), ((int)(((byte)(82)))));
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.Color.SteelBlue;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvDetalleIndexacion.RowHeadersDefaultCellStyle = dataGridViewCellStyle7;
             this.dgvDetalleIndexacion.RowHeadersVisible = false;
             this.dgvDetalleIndexacion.RowHeadersWidth = 15;
-            dataGridViewCellStyle16.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(66)))), ((int)(((byte)(82)))));
-            dataGridViewCellStyle16.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle16.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle16.SelectionBackColor = System.Drawing.Color.SteelBlue;
-            dataGridViewCellStyle16.SelectionForeColor = System.Drawing.Color.White;
-            this.dgvDetalleIndexacion.RowsDefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(49)))), ((int)(((byte)(66)))), ((int)(((byte)(82)))));
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.SteelBlue;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.Color.White;
+            this.dgvDetalleIndexacion.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.dgvDetalleIndexacion.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvDetalleIndexacion.Size = new System.Drawing.Size(462, 100);
             this.dgvDetalleIndexacion.TabIndex = 18;
@@ -1104,7 +1119,7 @@ public class frmHistoriasClinicas : Form
             this.btnGuardar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnGuardar.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnGuardar.ForeColor = System.Drawing.Color.White;
-            this.btnGuardar.Location = new System.Drawing.Point(26, 484);
+            this.btnGuardar.Location = new System.Drawing.Point(22, 402);
             this.btnGuardar.Name = "btnGuardar";
             this.btnGuardar.Size = new System.Drawing.Size(500, 30);
             this.btnGuardar.TabIndex = 5;
@@ -1127,7 +1142,7 @@ public class frmHistoriasClinicas : Form
             // txtFeNacimiento
             // 
             this.txtFeNacimiento.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtFeNacimiento.Location = new System.Drawing.Point(180, 440);
+            this.txtFeNacimiento.Location = new System.Drawing.Point(176, 366);
             this.txtFeNacimiento.MaxLength = 10;
             this.txtFeNacimiento.Name = "txtFeNacimiento";
             this.txtFeNacimiento.Size = new System.Drawing.Size(146, 26);
@@ -1148,7 +1163,7 @@ public class frmHistoriasClinicas : Form
             this.pnlLote.Controls.Add(this.label1);
             this.pnlLote.Location = new System.Drawing.Point(12, 12);
             this.pnlLote.Name = "pnlLote";
-            this.pnlLote.Size = new System.Drawing.Size(531, 108);
+            this.pnlLote.Size = new System.Drawing.Size(531, 88);
             this.pnlLote.TabIndex = 66;
             // 
             // lblRutaLote
@@ -1156,7 +1171,7 @@ public class frmHistoriasClinicas : Form
             this.lblRutaLote.AutoSize = true;
             this.lblRutaLote.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblRutaLote.ForeColor = System.Drawing.Color.White;
-            this.lblRutaLote.Location = new System.Drawing.Point(193, 69);
+            this.lblRutaLote.Location = new System.Drawing.Point(181, 60);
             this.lblRutaLote.Name = "lblRutaLote";
             this.lblRutaLote.Size = new System.Drawing.Size(75, 16);
             this.lblRutaLote.TabIndex = 81;
@@ -1167,7 +1182,7 @@ public class frmHistoriasClinicas : Form
             this.lblLote.AutoSize = true;
             this.lblLote.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblLote.ForeColor = System.Drawing.Color.White;
-            this.lblLote.Location = new System.Drawing.Point(193, 38);
+            this.lblLote.Location = new System.Drawing.Point(181, 34);
             this.lblLote.Name = "lblLote";
             this.lblLote.Size = new System.Drawing.Size(47, 16);
             this.lblLote.TabIndex = 80;
@@ -1178,7 +1193,7 @@ public class frmHistoriasClinicas : Form
             this.lblProyecto.AutoSize = true;
             this.lblProyecto.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblProyecto.ForeColor = System.Drawing.Color.White;
-            this.lblProyecto.Location = new System.Drawing.Point(193, 10);
+            this.lblProyecto.Location = new System.Drawing.Point(181, 10);
             this.lblProyecto.Name = "lblProyecto";
             this.lblProyecto.Size = new System.Drawing.Size(75, 16);
             this.lblProyecto.TabIndex = 78;
@@ -1189,7 +1204,7 @@ public class frmHistoriasClinicas : Form
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.ForeColor = System.Drawing.Color.White;
-            this.label7.Location = new System.Drawing.Point(13, 69);
+            this.label7.Location = new System.Drawing.Point(13, 60);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(77, 16);
             this.label7.TabIndex = 77;
@@ -1200,7 +1215,7 @@ public class frmHistoriasClinicas : Form
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.ForeColor = System.Drawing.Color.White;
-            this.label6.Location = new System.Drawing.Point(13, 37);
+            this.label6.Location = new System.Drawing.Point(13, 34);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(41, 16);
             this.label6.TabIndex = 76;
@@ -1222,29 +1237,29 @@ public class frmHistoriasClinicas : Form
             this.lblCantidadArchivos.AutoSize = true;
             this.lblCantidadArchivos.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCantidadArchivos.ForeColor = System.Drawing.Color.White;
-            this.lblCantidadArchivos.Location = new System.Drawing.Point(226, 12);
+            this.lblCantidadArchivos.Location = new System.Drawing.Point(401, 37);
             this.lblCantidadArchivos.Name = "lblCantidadArchivos";
-            this.lblCantidadArchivos.Size = new System.Drawing.Size(127, 16);
+            this.lblCantidadArchivos.Size = new System.Drawing.Size(28, 16);
             this.lblCantidadArchivos.TabIndex = 83;
-            this.lblCantidadArchivos.Text = "lblCantidadArchivos";
+            this.lblCantidadArchivos.Text = "123";
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(26)))), ((int)(((byte)(32)))), ((int)(((byte)(40)))));
             this.panel1.Controls.Add(this.lblArchivo);
-            this.panel1.Location = new System.Drawing.Point(12, 255);
+            this.panel1.Location = new System.Drawing.Point(12, 207);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(531, 47);
+            this.panel1.Size = new System.Drawing.Size(531, 42);
             this.panel1.TabIndex = 84;
             // 
             // lblArchivo
             // 
             this.lblArchivo.AutoSize = true;
-            this.lblArchivo.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblArchivo.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblArchivo.ForeColor = System.Drawing.Color.White;
-            this.lblArchivo.Location = new System.Drawing.Point(129, 12);
+            this.lblArchivo.Location = new System.Drawing.Point(143, 8);
             this.lblArchivo.Name = "lblArchivo";
-            this.lblArchivo.Size = new System.Drawing.Size(284, 24);
+            this.lblArchivo.Size = new System.Drawing.Size(239, 20);
             this.lblArchivo.TabIndex = 78;
             this.lblArchivo.Text = "No hay archivo Seleccionado";
             // 
@@ -1258,14 +1273,14 @@ public class frmHistoriasClinicas : Form
             this.panel2.Controls.Add(this.label8);
             this.panel2.Controls.Add(this.lblCantidadArchivos);
             this.panel2.Controls.Add(this.label10);
-            this.panel2.Location = new System.Drawing.Point(12, 126);
+            this.panel2.Location = new System.Drawing.Point(12, 102);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(531, 123);
+            this.panel2.Size = new System.Drawing.Size(531, 104);
             this.panel2.TabIndex = 85;
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(17, 92);
+            this.progressBar1.Location = new System.Drawing.Point(14, 65);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(500, 23);
             this.progressBar1.TabIndex = 88;
@@ -1275,7 +1290,7 @@ public class frmHistoriasClinicas : Form
             this.lblCantidadPendiente.AutoSize = true;
             this.lblCantidadPendiente.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCantidadPendiente.ForeColor = System.Drawing.Color.White;
-            this.lblCantidadPendiente.Location = new System.Drawing.Point(226, 59);
+            this.lblCantidadPendiente.Location = new System.Drawing.Point(144, 37);
             this.lblCantidadPendiente.Name = "lblCantidadPendiente";
             this.lblCantidadPendiente.Size = new System.Drawing.Size(136, 16);
             this.lblCantidadPendiente.TabIndex = 87;
@@ -1286,7 +1301,7 @@ public class frmHistoriasClinicas : Form
             this.label11.AutoSize = true;
             this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label11.ForeColor = System.Drawing.Color.White;
-            this.label11.Location = new System.Drawing.Point(14, 59);
+            this.label11.Location = new System.Drawing.Point(11, 37);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(121, 16);
             this.label11.TabIndex = 86;
@@ -1297,7 +1312,7 @@ public class frmHistoriasClinicas : Form
             this.lblCantidadIndexado.AutoSize = true;
             this.lblCantidadIndexado.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblCantidadIndexado.ForeColor = System.Drawing.Color.White;
-            this.lblCantidadIndexado.Location = new System.Drawing.Point(226, 37);
+            this.lblCantidadIndexado.Location = new System.Drawing.Point(144, 11);
             this.lblCantidadIndexado.Name = "lblCantidadIndexado";
             this.lblCantidadIndexado.Size = new System.Drawing.Size(131, 16);
             this.lblCantidadIndexado.TabIndex = 85;
@@ -1308,7 +1323,7 @@ public class frmHistoriasClinicas : Form
             this.label8.AutoSize = true;
             this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label8.ForeColor = System.Drawing.Color.White;
-            this.label8.Location = new System.Drawing.Point(14, 37);
+            this.label8.Location = new System.Drawing.Point(11, 11);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(115, 16);
             this.label8.TabIndex = 84;
@@ -1319,17 +1334,17 @@ public class frmHistoriasClinicas : Form
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label10.ForeColor = System.Drawing.Color.White;
-            this.label10.Location = new System.Drawing.Point(14, 12);
+            this.label10.Location = new System.Drawing.Point(343, 11);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(159, 16);
+            this.label10.Size = new System.Drawing.Size(155, 16);
             this.label10.TabIndex = 82;
-            this.label10.Text = "Total de Documentos:";
+            this.label10.Text = "Total de Documentos";
             // 
             // txtNombreApellido
             // 
             this.txtNombreApellido.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.txtNombreApellido.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtNombreApellido.Location = new System.Drawing.Point(180, 403);
+            this.txtNombreApellido.Location = new System.Drawing.Point(176, 329);
             this.txtNombreApellido.Name = "txtNombreApellido";
             this.txtNombreApellido.Size = new System.Drawing.Size(346, 26);
             this.txtNombreApellido.TabIndex = 3;
@@ -1340,7 +1355,7 @@ public class frmHistoriasClinicas : Form
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(26, 409);
+            this.label2.Location = new System.Drawing.Point(22, 335);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(122, 16);
             this.label2.TabIndex = 87;

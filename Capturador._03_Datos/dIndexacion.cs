@@ -454,7 +454,7 @@ public class dIndexacion
 		oCom.Parameters.Add("@p_nuHistoriaClinica", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.nuHistoriaClinica;
         oCom.Parameters.Add("@p_nuDNI", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.nuDNI;
         oCom.Parameters.Add("@p_dsNombreApellido", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.dsNombreApellido;
-        oCom.Parameters.Add("@p_feNacimiento", SqlDbType.VarChar).Value = pIDX_Historia_Clinica.feNacimiento;
+        oCom.Parameters.Add("@p_feNacimiento", SqlDbType.Date).Value = pIDX_Historia_Clinica.feNacimiento;
 
         try
         {
